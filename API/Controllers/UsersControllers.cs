@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controller
 {
-   
+
     public class UsersController : BaseApiController
     {
         private readonly DataContext _context;
@@ -28,7 +28,12 @@ namespace API.Controller
 
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<AppUser>> GetUser(int id) => await _context.Users.FindAsync(id);
+        public async Task<ActionResult<AppUser>> GetUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            return user != null ? Ok(user) : NotFound();
+        }
 
     }
 }
