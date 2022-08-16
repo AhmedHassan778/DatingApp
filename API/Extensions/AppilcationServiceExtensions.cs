@@ -3,21 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Helpers;
 using API.interfaces;
 using API.services;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions
 {
     public static class AppilcationServiceExtensions
     {
-     public static IServiceCollection AddApplicationServices(this IServiceCollection services,IConfiguration config){
-          services.AddScoped<ITokenService, TokenService>();
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
+        {
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IUserRepository,UserRepository>();
+            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
             });
             return services;
-     }   
+        }
     }
 }
