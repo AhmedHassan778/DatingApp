@@ -49,7 +49,7 @@ namespace API.Data
          .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
          .ToListAsync();
         }
-        
+
         [HttpGet]
         public async Task<IEnumerable<AppUser>> GetUsersAsync()
         {
