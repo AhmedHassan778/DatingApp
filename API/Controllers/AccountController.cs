@@ -8,6 +8,7 @@ using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +20,11 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly ITokenService _tokenService;
+        private readonly IMapper _mapper;
 
-        public AccountController(DataContext context, ITokenService tokenService)
+        public AccountController(DataContext context, ITokenService tokenService, IMapper mapper)
         {
+            _mapper = mapper;
             _tokenService = tokenService;
             _context = context;
         }
@@ -32,7 +35,7 @@ namespace API.Controllers
         {
 
             AppUser user = await _context.Users
-            .Include(p=>p.Photos)
+            .Include(p => p.Photos)
             .SingleOrDefaultAsync(x => x.UserName.ToLower() == loginDto.UserName.ToLower());
 
             if (user == null) return Unauthorized("Invalid User name");
@@ -44,7 +47,7 @@ namespace API.Controllers
             {
                 UserName = user.UserName,
                 token = _tokenService.CreateToken(user),
-                PhotoUrl=user.Photos.FirstOrDefault(x=>x.IsMain)?.Url,
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
             };
         }
 
@@ -54,14 +57,13 @@ namespace API.Controllers
 
             if (await userExists(registerDto.UserName)) return BadRequest("User name is token");
 
-            using var hmac = new HMACSHA512();
 
-            AppUser user = new AppUser
-            {
-                UserName = registerDto.UserName,
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key,
-            };
+            var user = _mapper.Map<AppUser>(registerDto);
+            using var hmac = new HMACSHA512();
+            user.UserName = registerDto.UserName.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+            user.PasswordSalt = hmac.Key;
+
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -69,10 +71,11 @@ namespace API.Controllers
             {
                 UserName = user.UserName,
                 token = _tokenService.CreateToken(user),
+                KnownAs=user.KnownAs,
             };
         }
 
-        private async Task<bool> userExists(string userName) 
+        private async Task<bool> userExists(string userName)
         {
             return await _context.Users.AnyAsync(x => x.UserName.ToLower() == userName.ToLower());
         }
