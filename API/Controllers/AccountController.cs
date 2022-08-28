@@ -64,14 +64,14 @@ namespace API.Controllers
             user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
             user.PasswordSalt = hmac.Key;
 
-
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return new UserDto
             {
                 UserName = user.UserName,
                 token = _tokenService.CreateToken(user),
-                KnownAs=user.KnownAs,
+                KnownAs = user.KnownAs,
+                Gender = user.Gender,
             };
         }
 
