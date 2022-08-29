@@ -94,6 +94,16 @@ export class MembersService {
     }));
   }
 
+  addLike(username: string) {
+    return this.http.post(this.baseUrl + "likes/" + username, {});
+  }
+
+  getLikes(predicate: string, pageNumber, pageSize) {
+    let params = this.getPginationHeader(pageNumber, pageSize);
+    params = params.append("predicate", predicate);
+    return this.getPaginatedResult<Partial<Member[]>>(this.baseUrl + "likes" , params);
+  }
+
   setMainPhoto(photoId: number) {
     return this.http.put(this.baseUrl + 'users/set-main-photo/' + photoId, {});
   }
