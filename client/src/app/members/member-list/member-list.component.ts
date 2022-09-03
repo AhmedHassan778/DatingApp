@@ -41,6 +41,7 @@ export class MemberListComponent implements OnInit {
     this.userParams = new UserParams(this.user);
     this.loadMembers();
   }
+
   pageChanged(event: any) {
     this.userParams.pageNumber = event.page;
     this.memberService.setUserParams(this.userParams);
